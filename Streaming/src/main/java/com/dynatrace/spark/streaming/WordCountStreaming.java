@@ -7,6 +7,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
+import scala.Tuple2;
 
 import java.io.File;
 import java.util.Arrays;
@@ -40,8 +41,7 @@ public class WordCountStreaming {
         }
         // add the RDDs as batches to the stream
         JavaDStream<String> inputStream = context.queueStream(rdds);
-
-        // TODO process the RDDs
+        inputStream.filter(x -> x.length() > 0).mapToPair(s -> new Tuple2<>(s, 1)).reduceByKey(Integer::sum).print(100);
 
         context.start();
         context.awaitTermination();
