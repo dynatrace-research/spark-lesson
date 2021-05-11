@@ -9,3 +9,5 @@
 
 include 'BasicExamples'
 rootProject.name = 'Spark-Examples'
+include 'CosineSimilarity'
+include 'Streaming'
