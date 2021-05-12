@@ -1,0 +1,2 @@
+com/dynatrace/spark/streaming/StreamingExample.java
+ com.dynatrace.spark.streaming.StreamingExample
