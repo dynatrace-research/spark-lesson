@@ -1,5 +1,7 @@
 package com.dynatrace.spark.dataset;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -16,6 +18,8 @@ import java.util.List;
 public class DataFrameExample {
 
     public static void main(String[] args) {
+        Logger.getLogger("org").setLevel(Level.ERROR);
+
         SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]");
         SparkSession sparkSession = SparkSession.builder().config(conf).getOrCreate();
 

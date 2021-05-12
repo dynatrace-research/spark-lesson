@@ -1,5 +1,7 @@
 package com.dynatrace.spark.streaming;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.streaming.Duration;
@@ -13,6 +15,8 @@ import java.util.Queue;
 public class StreamingExample {
 
     public static void main(String[] args) throws InterruptedException {
+        Logger.getLogger("org").setLevel(Level.ERROR);
+
         // create the config and SparkContext
         SparkConf conf = new SparkConf().setAppName("StreamingExample").setMaster("local[*]");
         // 5.000 -> time interval for batches is 5s

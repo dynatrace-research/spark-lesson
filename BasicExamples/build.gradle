@@ -21,6 +21,7 @@ dependencies {
     implementation libraries.scala
     implementation libraries.spark_core
     implementation libraries.spark_sql
+    implementation libraries.spark_streaming
 
     testImplementation libraries.jupiter
     testRuntimeOnly libraries.jupiter_engine
