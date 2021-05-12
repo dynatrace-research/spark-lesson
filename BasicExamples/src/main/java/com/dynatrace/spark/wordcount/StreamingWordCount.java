@@ -18,7 +18,8 @@ public class StreamingWordCount {
     public static void main(String[] args) throws TimeoutException {
         Logger.getLogger("org").setLevel(Level.ERROR);
 
-        SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]");
+        SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]")
+                .set("spark.driver.bindAddress", "127.0.0.1");
         SparkSession sparkSession = SparkSession.builder().config(conf).getOrCreate();
         URL resource = WordCount.class.getClassLoader().getResource("stream");
 

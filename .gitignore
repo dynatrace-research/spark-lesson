@@ -40,4 +40,6 @@ out/
 generated/
 
 
-/build
+build
+
+.gradle

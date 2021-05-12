@@ -13,7 +13,8 @@ public class WordCount {
 
     public static void main(String[] args) {
         Logger.getLogger("org").setLevel(Level.ERROR);
-        SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]");
+        SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]")
+                .set("spark.driver.bindAddress", "127.0.0.1");
         SparkSession sparkSession = SparkSession.builder().config(conf).getOrCreate();
         SparkContext sparkContext = sparkSession.sparkContext();
 
