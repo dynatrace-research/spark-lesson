@@ -4,7 +4,10 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.function.FilterFunction;
-import org.apache.spark.sql.*;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoder;
+import org.apache.spark.sql.Encoders;
+import org.apache.spark.sql.SparkSession;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -15,15 +18,16 @@ public class DataSetExampleEncoder {
     public static void main(String[] args) {
         Logger.getLogger("org").setLevel(Level.ERROR);
 
-        SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]")
+        SparkConf conf = new SparkConf().setAppName("DataSetExample").setMaster("local[*]")
                 .set("spark.driver.bindAddress", "127.0.0.1");
         SparkSession sparkSession = SparkSession.builder().config(conf).getOrCreate();
 
         Encoder<Record> encoder = Encoders.javaSerialization(Record.class);
         Dataset<Record> dataset = sparkSession.createDataset(rows(), encoder);
 
-        dataset.filter((FilterFunction<Record>) wrapper -> wrapper.getC() == 11)
-                .collect();
+        for (Record r : (Record[]) dataset.filter((FilterFunction<Record>) wrapper -> wrapper.getC() == 11).collect()) {
+            System.out.println(r);
+        }
     }
 
     private static List<Record> rows() {
@@ -70,7 +74,14 @@ public class DataSetExampleEncoder {
             this.c = c;
         }
 
-
+        @Override
+        public String toString() {
+            return "Record{" +
+                    "a='" + a + '\'' +
+                    ", b='" + b + '\'' +
+                    ", c=" + c +
+                    '}';
+        }
     }
 }
 
