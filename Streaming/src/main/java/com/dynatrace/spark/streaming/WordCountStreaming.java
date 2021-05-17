@@ -26,7 +26,7 @@ public class WordCountStreaming {
         JavaStreamingContext context = new JavaStreamingContext(conf, new Duration(5_000));
 
         // get all files names
-        File baseDir = new File("./data/simpleExample");
+        File baseDir = new File("./data/testExample");
         String[] fileDir = Arrays.stream(Objects.requireNonNull(baseDir.listFiles()))
                 .map(File::getPath).toArray(String[]::new);
 
@@ -35,7 +35,7 @@ public class WordCountStreaming {
         for (String file : fileDir) {
             JavaRDD<String> javaRdd = context.sparkContext()
                     .textFile(file)
-                    .flatMap(s -> Arrays.asList(s.split("[. ]")).iterator());
+                    .flatMap(s -> Arrays.asList(s.split("[^a-zA-Z0-9]")).iterator());
             rdds.add(javaRdd);
         }
         // add the RDDs as batches to the stream
