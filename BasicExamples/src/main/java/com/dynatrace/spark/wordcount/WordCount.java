@@ -7,7 +7,8 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
 
-import java.net.URL;
+import java.io.File;
+import java.util.Arrays;
 
 public class WordCount {
 
@@ -18,8 +19,9 @@ public class WordCount {
         SparkSession sparkSession = SparkSession.builder().config(conf).getOrCreate();
         SparkContext sparkContext = sparkSession.sparkContext();
 
-        URL resource = WordCount.class.getClassLoader().getResource("loremipsum");
-        JavaRDD<String> textFile = sparkContext.textFile(resource.getPath(), 1).toJavaRDD();
-
+        File file = new File("./data/loremipsum");
+        JavaRDD<String> textFile = sparkContext.textFile(file.getPath(), 1).toJavaRDD();
+        long count = textFile.flatMap(content -> Arrays.asList(content.split(" ")).iterator()).count();
+        System.out.println(count);
     }
 }

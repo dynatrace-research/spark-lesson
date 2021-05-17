@@ -1,4 +1,4 @@
-package com.dynatrace.spark.wordcount;
+package com.dynatrace.spark.streaming;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -9,11 +9,16 @@ import org.apache.spark.sql.*;
 import org.apache.spark.sql.streaming.OutputMode;
 import org.apache.spark.sql.streaming.StreamingQuery;
 
+import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 
-public class StreamingWordCount {
+
+/**
+ * Alternative solution to stream a number of text files using the DataSource v2 API by Spark.
+ */
+public class AltWordCountStreaming {
 
     public static void main(String[] args) throws TimeoutException {
         Logger.getLogger("org").setLevel(Level.ERROR);
@@ -21,12 +26,12 @@ public class StreamingWordCount {
         SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]")
                 .set("spark.driver.bindAddress", "127.0.0.1");
         SparkSession sparkSession = SparkSession.builder().config(conf).getOrCreate();
-        URL resource = WordCount.class.getClassLoader().getResource("stream");
+        File baseDir = new File("./data/simpleExample");
 
         // create data source
         Dataset<String> dataFrame = sparkSession.readStream()
                 .option("maxFilesPerTrigger", 1) // maximum number of new files to be considered in every trigger
-                .text(resource.getPath())
+                .text(baseDir.getPath()) 
                 .as(Encoders.STRING());
 
         // do word count as usual
