@@ -21,7 +21,5 @@ public class WordCount {
 
         File file = new File("./data/loremipsum");
         JavaRDD<String> textFile = sparkContext.textFile(file.getPath(), 1).toJavaRDD();
-        long count = textFile.flatMap(content -> Arrays.asList(content.split(" ")).iterator()).count();
-        System.out.println(count);
     }
 }
