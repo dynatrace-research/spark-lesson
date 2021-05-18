@@ -20,27 +20,14 @@ public class DataFrameExample {
     public static void main(String[] args) {
         Logger.getLogger("org").setLevel(Level.ERROR);
 
-        SparkConf conf = new SparkConf().setAppName("WordCount").setMaster("local[*]")
+        SparkConf conf = new SparkConf().setAppName("DataFrameExample").setMaster("local[*]")
                 .set("spark.driver.bindAddress", "127.0.0.1");
         SparkSession sparkSession = SparkSession.builder().config(conf).getOrCreate();
 
         Dataset<Row> dataFrame = sparkSession.createDataFrame(rows(), schema());
-        Dataset<Row> sumPerCategory = dataFrame.groupBy("a", "b")
-                .sum("c");
-        Row[] collected = (Row[]) sumPerCategory
-                .collect();
+        Dataset<Row> sumPerCategory = dataFrame.groupBy("a", "b").sum("c");
 
-        printRows(collected);
-    }
-
-    private static void printRows(Row[] collected) {
-        for (Row row : collected) {
-            for (int i = 0; i < row.length(); i++) {
-                System.out.print(row.get(i));
-                System.out.print(";");
-            }
-            System.out.println();
-        }
+        sumPerCategory.show();
     }
 
     private static List<Row> rows() {
@@ -50,7 +37,6 @@ public class DataFrameExample {
                 RowFactory.create("A3", "B3", 13)
         );
     }
-
 
     private static StructType schema() {
         return DataTypes.createStructType(new StructField[]{
