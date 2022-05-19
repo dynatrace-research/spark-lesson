@@ -7,6 +7,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
+import scala.Tuple2;
 
 import java.io.File;
 import java.util.Arrays;
@@ -23,28 +24,32 @@ public class WordCountStreaming {
         SparkConf conf = new SparkConf().setAppName("StreamingExample").setMaster("local[*]")
                 .set("spark.driver.bindAddress", "127.0.0.1");
         // 5s time interval for batches
-        JavaStreamingContext context = new JavaStreamingContext(conf, new Duration(5_000));
+        try (JavaStreamingContext context = new JavaStreamingContext(conf, new Duration(5_000))) {
 
-        // get all files names
-        File baseDir = new File("./data/testExample");
-        String[] fileDir = Arrays.stream(Objects.requireNonNull(baseDir.listFiles()))
-                .map(File::getPath).toArray(String[]::new);
+            // get all files names
+            File baseDir = new File("./data/testExample");
+            String[] fileDir = Arrays.stream(Objects.requireNonNull(baseDir.listFiles()))
+                    .map(File::getPath).toArray(String[]::new);
 
-        // define RDDs with the file content (split into individual words)
-        Queue<JavaRDD<String>> rdds = new LinkedList<>();
-        for (String file : fileDir) {
-            JavaRDD<String> javaRdd = context.sparkContext()
-                    .textFile(file)
-                    .flatMap(s -> Arrays.asList(s.split("[^a-zA-Z0-9]")).iterator());
-            rdds.add(javaRdd);
+            // define RDDs with the file content (split into individual words)
+            Queue<JavaRDD<String>> rdds = new LinkedList<>();
+            for (String file : fileDir) {
+                JavaRDD<String> javaRdd = context.sparkContext()
+                        .textFile(file)
+                        .flatMap(s -> Arrays.asList(s.split("[^a-zA-Z0-9]")).iterator());
+                rdds.add(javaRdd);
+            }
+            // add the RDDs as batches to the stream
+            JavaDStream<String> inputStream = context.queueStream(rdds);
+            inputStream
+                    .filter(x -> x.length() > 0)
+                    .mapToPair(s -> new Tuple2<>(s, 1))
+                    .reduceByKey(Integer::sum)
+                    .print(20);
+
+            context.start();
+            context.awaitTermination();
         }
-        // add the RDDs as batches to the stream
-        JavaDStream<String> inputStream = context.queueStream(rdds);
-
-        // TODO process the RDDs
-
-        context.start();
-        context.awaitTermination();
     }
 
 }
