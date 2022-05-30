@@ -3,10 +3,19 @@ package com.dynatrace.spark.structuredstreaming;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.MapFunction;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.StreamingQueryException;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
+
+import static org.apache.spark.sql.functions.*;
 
 public class JoinExample {
 
@@ -29,16 +38,47 @@ public class JoinExample {
 
         // DATASET FROM FILE
 
-        // TODO
+        Dataset<Row> completeDataset = sparkSession.read().textFile("./data/loremipsum")
+                .flatMap((FlatMapFunction<String, String>) s ->
+                        Arrays.stream(s.split("[^a-zA-Z0-9]")).iterator(), Encoders.STRING())
+                .filter(col(VALUE).notEqual(""))
+                .map((MapFunction<String, String>) (String::toLowerCase), Encoders.STRING())
+                .groupBy(VALUE)
+                .count()
+                .withColumnRenamed(COUNT, TOTAL_COUNT);
+
 
         // DATASET FROM STREAM
 
-        //TODO
+        Dataset<Row> streamInput = sparkSession
+                .readStream()
+                .format("socket")
+                .option("host", "localhost")
+                .option("port", "1234")
+                .load();
+        Dataset<Row> words = streamInput.as(Encoders.STRING())
+                .flatMap((FlatMapFunction<String, String>) s ->
+                        Arrays.asList(s.split("[^a-zA-Z0-9]")).iterator(), Encoders.STRING())
+                .filter(col(VALUE).notEqual(""))
+                .map((MapFunction<String, String>) (String::toLowerCase), Encoders.STRING())
+                .groupBy(VALUE)
+                .count();
+
 
         // JOIN
 
-        // TODO
+        Dataset<Row> counts = words
+                .join(completeDataset, VALUE)
+                .withColumn(PART_SEEN, round(col(COUNT).multiply(100).divide(col(TOTAL_COUNT)), 1))
+                .sort(col(PART_SEEN).desc(), col(COUNT).desc())
+                .withColumn(PART_SEEN, concat(col(PART_SEEN), lit("%")))                ;
 
+        StreamingQuery streamingQuery = counts.writeStream()
+                .outputMode("complete")
+                .format("console")
+                .start();
+
+        streamingQuery.awaitTermination();
     }
 
 }
