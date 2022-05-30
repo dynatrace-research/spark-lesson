@@ -1,4 +1,4 @@
-package com.dynatrace.spark.streaming.text;
+package com.dynatrace.spark.input;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class TextInput {
+public class ConsoleInput {
 
     public static void main(String[] args) {
 

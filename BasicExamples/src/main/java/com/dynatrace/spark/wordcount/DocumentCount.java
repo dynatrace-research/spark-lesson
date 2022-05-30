@@ -4,14 +4,13 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
-import scala.Tuple2;
 
 import java.io.File;
-import java.io.Serializable;
-import java.util.Comparator;
+import java.util.Arrays;
 
-public class WordCount {
+public class DocumentCount {
 
     public static void main(String[] args) {
         Logger.getLogger("org").setLevel(Level.ERROR);
@@ -23,15 +22,11 @@ public class WordCount {
         SparkContext sparkContext = sparkSession.sparkContext();
 
         File file = new File("./data/loremipsum");
-
-        // TODO
-
+        JavaRDD<String> textFile = sparkContext.textFile(file.getPath(), 1).toJavaRDD();
+        long count = textFile
+                .flatMap(s -> Arrays.asList(s.split(" ")).iterator())
+                .count();
+        System.out.println(count);
     }
 
-    static class TupleComparator implements Comparator<Tuple2<String, Integer>>, Serializable {
-        public int compare(Tuple2<String, Integer> t1,
-                           Tuple2<String, Integer> t2) {
-            return t2._2.compareTo(t1._2);
-        }
-    }
 }

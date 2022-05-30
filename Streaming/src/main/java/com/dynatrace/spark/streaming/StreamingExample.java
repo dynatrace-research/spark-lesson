@@ -28,7 +28,7 @@ public class StreamingExample {
             rdds.add(context.sparkContext().parallelize(Arrays.asList("d", "e", "f")));
             rdds.add(context.sparkContext().parallelize(Arrays.asList("g", "h", "i")));
 
-            // add the documents to the stream
+            // add the documents to the stream - simulating an input stream
             JavaDStream<String> inputStream = context.queueStream(rdds);
             // processing step
             inputStream.map(String::toUpperCase).print();
